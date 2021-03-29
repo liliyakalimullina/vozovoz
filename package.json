@@ -14,7 +14,8 @@
     "core-js": "^3.8.3",
     "nuxt": "^2.14.12",
     "nuxt-vue-select": "^0.1.4",
-    "v-mask": "^2.2.4"
+    "v-mask": "^2.2.4",
+    "vue-the-mask": "^0.11.1"
   },
   "devDependencies": {
     "@nuxt/types": "^2.14.12",

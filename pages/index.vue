@@ -31,11 +31,11 @@
       <div class="calculator-row">
         <div class="calculator-options-item">
           <div class="calculator-options-item-title">Вес, кг</div>
-          <input type="text" @change="calculatePrice()" v-model="weight" v-mask="'#####.#'" class="calculator-options-item-input">
+          <input type="text" @change="weightUpdate()" v-model="weight" class="calculator-options-item-input" v-mask="['#####.#', '####.#', '###.#', '##.#', '#.#']" />
         </div>
         <div class="calculator-options-item">
           <div class="calculator-options-item-title">Объем, м<sup>3</sup></div>
-          <input type="text"  @change="calculatePrice()" v-model="volume" v-mask="'##.##'" class="calculator-options-item-input">
+          <input type="text"  @change="volumeUpdate()" v-model="volume" v-mask="['##.##', '#.##']" class="calculator-options-item-input">
         </div>
       </div>
     </div>
@@ -68,8 +68,8 @@ export default Vue.extend({
       price: 0,
       deliveryTimeFrom: 1,
       deliveryTimeTo: 1,
-      volume: '00.1',
-      weight: '00000.9',
+      volume: 0.1,
+      weight: 0.9,
       dispatchLocation: { code:'e90f1820-0128-11e5-80c7-00155d903d03', label: 'Москва', hasTerminal: true },
       dispatchLocationPoint: 'terminal', 
       destinationLocation: { code: 'e90f19de-0128-11e5-80c7-00155d903d03', label: 'Санкт-Петербург', hasTerminal: true },
@@ -127,7 +127,7 @@ export default Vue.extend({
       })
     }, 
     calculatePrice(): void {
-      this.$axios.post(this.url, {
+      const json = {
         object: 'price',
         action: 'get',
         params: {
@@ -153,20 +153,39 @@ export default Vue.extend({
             }
           }
         }
-      })
+      }
+      this.$axios.post(this.url, json)
       .then(response => {
         console.log(response)
         const responseData = response.data.response
         this.basePrice = responseData.basePrice
         this.price = responseData.price
         this.deliveryTimeFrom = responseData.deliveryTime.from
-        this.deliveryTimeTo = responseData.deliveryTime.to       
+        this.deliveryTimeTo = responseData.deliveryTime.to      
       })
+    },
+    weightUpdate(): void {
+      if(this.weight > 19999) {
+        this.weight = 19998.9
+      }
+      if(this.weight < 0.1) {
+        this.weight = 0.1
+      }
+      this.calculatePrice()
+    },
+    volumeUpdate(): void {
+      if(this.volume > 74) {
+        this.volume = 73.99
+      }
+      if(this.volume < 0.01) {
+        this.volume = 0.01
+      }
+      this.calculatePrice()
     }
   },
   watch: {
     dispatchLocation: function() {
-      if(this.dispatchLocation && !this.dispatchLocation.hasTerminal){
+      if(this.dispatchLocation && !this.dispatchLocation.hasTerminal && (this.dispatchLocationPoint === 'terminal')){
         this.dispatchLocationPoint = 'address'
       }
       else {
@@ -174,7 +193,7 @@ export default Vue.extend({
       }
     },
     destinationLocation: function() {
-      if(this.destinationLocation && !this.destinationLocation.hasTerminal){
+      if(this.destinationLocation && !this.destinationLocation.hasTerminal && (this.destinationLocationPoint === 'terminal')){
         this.destinationLocationPoint = 'address'
       }
       else {
