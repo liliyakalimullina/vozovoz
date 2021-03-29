@@ -8,7 +8,7 @@
             <v-select :options="locations" v-model="dispatchLocation" @search="searchLocation" class="calculator-select"></v-select>
           </client-only>
           <div class="calculator-radio">
-            <input name="option-from" type="radio" id="address-from" value="address" v-model="dispatchLocationPoint" > 
+            <input name="option-from" type="radio" id="address-from" value="address" v-model="dispatchLocationPoint"> 
             <label for="address-from">От адреса</label> 
             <input name="option-from" type="radio" id="terminal-from" value="terminal" v-model="dispatchLocationPoint" :disabled="dispatchLocation && !dispatchLocation.hasTerminal"> 
             <label for="terminal-from">От терминала</label>
@@ -31,11 +31,11 @@
       <div class="calculator-row">
         <div class="calculator-options-item">
           <div class="calculator-options-item-title">Вес, кг</div>
-          <input type="text" @change="send()" v-model="weight" v-mask="'#####.#'" class="calculator-options-item-input">
+          <input type="text" @change="calculatePrice()" v-model="weight" v-mask="'#####.#'" class="calculator-options-item-input">
         </div>
         <div class="calculator-options-item">
           <div class="calculator-options-item-title">Объем, м<sup>3</sup></div>
-          <input type="text"  @change="send()" v-model="volume" v-mask="'##.##'" class="calculator-options-item-input">
+          <input type="text"  @change="calculatePrice()" v-model="volume" v-mask="'##.##'" class="calculator-options-item-input">
         </div>
       </div>
     </div>
@@ -73,15 +73,14 @@ export default Vue.extend({
       dispatchLocation: { code:'e90f1820-0128-11e5-80c7-00155d903d03', label: 'Москва', hasTerminal: true },
       dispatchLocationPoint: 'terminal', 
       destinationLocation: { code: 'e90f19de-0128-11e5-80c7-00155d903d03', label: 'Санкт-Петербург', hasTerminal: true },
-      destinationLocationPoint: 'terminal',
-      optionsChanged: false
+      destinationLocationPoint: 'terminal'
     }
   },
   created() {
     this.$axios.post(this.url, {
-      "object": "location",
-      "action": "get",
-      "params": {
+      object: 'location',
+      action: 'get',
+      params: {
         limit: 100,
         offset: 0
       }
@@ -92,7 +91,7 @@ export default Vue.extend({
       for(let i = 0; i < responseData.length; i++) {
         this.locations.push({ label: responseData[i].name, code: responseData[i].guid, hasTerminal: !!responseData[i].default_terminal })
       }
-      this.send()
+      this.calculatePrice()
     })
   },
   computed: {
@@ -109,15 +108,12 @@ export default Vue.extend({
     }
   },
   methods: {
-    searchLocation (search: string, loading: any) {
+    searchLocation (search: string, loading: any): void {
       console.log(search + ' ' + loading)
-      this.getLocations(search)
-    },
-    getLocations(search: string) {
       this.$axios.post(this.url, {
-        "object": "location",
-        "action": "get",
-        "params": {
+        object: 'location',
+        action: 'get',
+        params: {
           search: search,
         }
       })
@@ -130,36 +126,29 @@ export default Vue.extend({
         console.log(this.locations)
       })
     }, 
-    getDispatchPoint(): string {
-      return this.dispatchLocationPoint
-    },
-    getDestinationPoint(): string {
-      return this.destinationLocationPoint
-    },
-    send(): void {
-
+    calculatePrice(): void {
       this.$axios.post(this.url, {
-        "object": "price",
-        "action": "get",
-        "params": {
-          "cargo" : {
-            "dimension": {
-              "quantity": 1,
-              "volume": this.volume,
-              "weight": this.weight
+        object: 'price',
+        action: 'get',
+        params: {
+          cargo : {
+            dimension: {
+              quantity: 1,
+              volume: this.volume,
+              weight: this.weight
             }
           },
-          "gateway": {
-            "dispatch": {
-              "point": {
-                "location": this.dispatchLocation.code,
-                "terminal": (this.dispatchLocationPoint === 'terminal' ? 'default' : '')
+          gateway: {
+            dispatch: {
+              point: {
+                location: this.dispatchLocation.code,
+                terminal: (this.dispatchLocationPoint === 'terminal' ? 'default' : '')
               }
             },
-            "destination": {
-              "point": {
-                "location": this.destinationLocation.code,
-                "terminal": (this.destinationLocationPoint === 'terminal' ? 'default' : '')
+            destination: {
+              point: {
+                location: this.destinationLocation.code,
+                terminal: (this.destinationLocationPoint === 'terminal' ? 'default' : '')
               }
             }
           }
@@ -181,7 +170,7 @@ export default Vue.extend({
         this.dispatchLocationPoint = 'address'
       }
       else {
-        this.send()
+        this.calculatePrice()
       }
     },
     destinationLocation: function() {
@@ -189,14 +178,14 @@ export default Vue.extend({
         this.destinationLocationPoint = 'address'
       }
       else {
-        this.send()
+        this.calculatePrice()
       }
     },
     dispatchLocationPoint: function() {
-      this.send()
+      this.calculatePrice()
     },
     destinationLocationPoint: function() {
-      this.send()
+      this.calculatePrice()
     }
   }
 })
@@ -257,7 +246,7 @@ export default Vue.extend({
       font-size: 35px;
       font-weight: 300;
       position: relative;
-      width: 110px;
+      width: 140px;
       margin: 0 auto;
       &::before {
         content: "";
