@@ -5,7 +5,7 @@
       <div class="calculator-row">
         <div class="calculator-options-item">
           <client-only>
-            <v-select :options="locations" v-model="dispatchLocation" @search="searchLocation"  ></v-select>
+            <v-select :options="locations" v-model="dispatchLocation" @search="searchLocation" class="calculator-select"></v-select>
           </client-only>
           <div class="calculator-radio">
             <input name="option-from" type="radio" id="address-from" value="address" v-model="dispatchLocationPoint" > 
@@ -18,7 +18,7 @@
         </div>
         <div class="calculator-options-item">
           <client-only>
-            <v-select :options="locations" v-model="destinationLocation" @search="searchLocation" ></v-select>
+            <v-select :options="locations" v-model="destinationLocation" @search="searchLocation" class="calculator-select"></v-select>
           </client-only>
           <div class="calculator-radio">
             <input name="option-to" type="radio" id="address-to" value="address" v-model="destinationLocationPoint" :checked="destinationLocation && !destinationLocation.hasTerminal"> 
@@ -30,29 +30,28 @@
       </div>
       <div class="calculator-row">
         <div class="calculator-options-item">
-          <div>Вес</div>
-          <input type="text" v-model="weight">
+          <div class="calculator-options-item-title">Вес, кг</div>
+          <input type="text" @change="send()" v-model="weight" v-mask="'#####.#'" class="calculator-options-item-input">
         </div>
         <div class="calculator-options-item">
-          <div>Объем</div>
-          <input type="text" v-model="volume">
+          <div class="calculator-options-item-title">Объем, м<sup>3</sup></div>
+          <input type="text"  @change="send()" v-model="volume" v-mask="'##.##'" class="calculator-options-item-input">
         </div>
       </div>
     </div>
     <div class="calculator-price">
       <div class="calculator-price-delivery">
-        Доставка: {{ delivery }}
+        Доставка: <span>{{ delivery }}</span>
       </div>
       <div class="calculator-price-amount">
-        {{ price }} Р
+        {{ price }} ₽<sup>*</sup>
       </div>
-      <div class="calculator-price-old-amount">
-        {{ basePrice }} P
+      <div class="calculator-price-base-amount">
+        {{ basePrice }} ₽
       </div>
       <div class="calculator-price-description">
         *При заказе через личный кабинет и максимальных параметрах одного места: длина – 0.2 м, ширина – 0.2 м, высота – 0.2 м и вес – 2.5 кг
       </div>
-      <button @click="send">Оформить заказ</button>
     </div>
   </div>
 </template>
@@ -69,11 +68,11 @@ export default Vue.extend({
       price: 0,
       deliveryTimeFrom: 1,
       deliveryTimeTo: 1,
-      volume: '0.1',
-      weight: '0.9',
-      dispatchLocation: { code:'e90f1820-0128-11e5-80c7-00155d903d03', label: 'Москва, Город федерального значения', hasTerminal: true },
+      volume: '00.1',
+      weight: '00000.9',
+      dispatchLocation: { code:'e90f1820-0128-11e5-80c7-00155d903d03', label: 'Москва', hasTerminal: true },
       dispatchLocationPoint: 'terminal', 
-      destinationLocation: { code: 'e90f19de-0128-11e5-80c7-00155d903d03', label: 'Санкт-Петербург, Город федерального значения', hasTerminal: true },
+      destinationLocation: { code: 'e90f19de-0128-11e5-80c7-00155d903d03', label: 'Санкт-Петербург', hasTerminal: true },
       destinationLocationPoint: 'terminal',
       optionsChanged: false
     }
@@ -91,7 +90,7 @@ export default Vue.extend({
       console.log(response)
       const responseData: any[]  = response.data.response.data
       for(let i = 0; i < responseData.length; i++) {
-        this.locations.push({ label: responseData[i].name + ', ' + responseData[i].region_str, code: responseData[i].guid, hasTerminal: !!responseData[i].default_terminal })
+        this.locations.push({ label: responseData[i].name, code: responseData[i].guid, hasTerminal: !!responseData[i].default_terminal })
       }
       this.send()
     })
@@ -126,7 +125,7 @@ export default Vue.extend({
         const responseData: any[]  = response.data.response.data
         this.locations.length = 0
         for(let i = 0; i < responseData.length; i++) {
-          this.locations.push({ label: responseData[i].name + ', ' + responseData[i].region_str, code: responseData[i].guid, hasTerminal: !!responseData[i].default_terminal })
+          this.locations.push({ label: responseData[i].name, code: responseData[i].guid, hasTerminal: !!responseData[i].default_terminal })
         }
         console.log(this.locations)
       })
@@ -181,24 +180,22 @@ export default Vue.extend({
       if(this.dispatchLocation && !this.dispatchLocation.hasTerminal){
         this.dispatchLocationPoint = 'address'
       }
-      this.send()
+      else {
+        this.send()
+      }
     },
     destinationLocation: function() {
       if(this.destinationLocation && !this.destinationLocation.hasTerminal){
         this.destinationLocationPoint = 'address'
       }
-      this.send
+      else {
+        this.send()
+      }
     },
     dispatchLocationPoint: function() {
       this.send()
     },
     destinationLocationPoint: function() {
-      this.send()
-    },
-    volume: function() {
-      this.send()
-    },
-    weight: function() {
       this.send()
     }
   }
@@ -210,32 +207,90 @@ export default Vue.extend({
   border: 1px solid #ccc;
   max-width: 800px;
   width: 100%;
-  margin: 0 auto;
+  margin: 70px auto 0;
   display: flex;
   justify-content: space-between;
-  padding: 20px;
+  padding: 30px;
+  box-shadow: 0 0 10px rgba(199,199,199,0.7);
+  border-radius: 5px;
+  h3 {
+    font-size: 24px;
+    font-weight: 400;
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
   &-row {
     display: flex;
     justify-content: space-between;
   }
   &-select {
     color: #ccc;
+    width: 220px;
+    margin-bottom: 15px;
   }
   &-options {
     max-width: 500px;
     width: 100%;
+    &-item {
+      margin-top: 40px;
+      &-title {
+        margin-bottom: 15px;
+      }
+      &-input {
+        width: 200px;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        &:focus {
+          border: 1px solid red !important;
+          outline: none;
+        }
+      }
+    }
   }
   &-price {
-    max-width: 250px;
+    max-width: 240px;
     width: 100%;
+    text-align: center;
+    &-base-amount {
+      color: #8b8b8b;
+      font-size: 35px;
+      font-weight: 300;
+      position: relative;
+      width: 110px;
+      margin: 0 auto;
+      &::before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        top: 50%;
+        left: 0;
+        transform: rotate(-7deg);
+        z-index: 1;
+        box-shadow: 0 0 1px 1px #fff;
+        background-color: #8b8b8b;
+      }
+    }
     &-amount {
       color: #ec1b22;
       font-weight: 700;
       font-size: 50px;
+      margin-top: 30px;
+      margin-bottom: 10px;
     }
     &-description {
       font-size: 12px;
       font-weight: 300;
+      max-width: 227px;
+      width: 100%;
+      margin: 10px auto 0;
+    }
+    &-delivery {
+      margin-top: 5px;
+      span {
+        color: #ec1b22;
+      }
     }
   }
   label {
