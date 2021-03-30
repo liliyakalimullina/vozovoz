@@ -68,8 +68,8 @@ export default Vue.extend({
       price: 0,
       deliveryTimeFrom: 1,
       deliveryTimeTo: 1,
-      volume: 0.1,
-      weight: 0.9,
+      volume: '0.1',
+      weight: '0.9',
       dispatchLocation: { code:'e90f1820-0128-11e5-80c7-00155d903d03', label: 'Москва', hasTerminal: true },
       dispatchLocationPoint: 'terminal', 
       destinationLocation: { code: 'e90f19de-0128-11e5-80c7-00155d903d03', label: 'Санкт-Петербург', hasTerminal: true },
@@ -161,21 +161,25 @@ export default Vue.extend({
       })
     },
     weightUpdate(): void {
-      if(this.weight > 19999) {
-        this.weight = 19998.9
+      if(Number(this.weight) > 19999) {
+        this.weight = '19990.0'
       }
-      if(this.weight < 0.1) {
-        this.weight = 0.1
+      if(Number(this.weight) < 0.1) {
+        this.weight = '0.1'
       }
+      let valid = Number(this.weight.replace(/^0+/, '')).toFixed(1)
+      this.weight = valid
       this.calculatePrice()
     },
     volumeUpdate(): void {
-      if(this.volume > 74) {
-        this.volume = 73.99
+      if(Number(this.volume) > 74) {
+        this.volume = '74.00'
       }
-      if(this.volume < 0.01) {
-        this.volume = 0.01
+      if(Number(this.volume) < 0.01) {
+        this.volume = '0.01'
       }
+      let valid = Number(this.volume.replace(/^0+/, '')).toFixed(2)
+      this.volume = valid
       this.calculatePrice()
     }
   },
@@ -282,7 +286,7 @@ export default Vue.extend({
       font-size: 35px;
       font-weight: 300;
       position: relative;
-      width: 140px;
+      width: 150px;
       margin: 0 auto;
       &::before {
         content: "";
