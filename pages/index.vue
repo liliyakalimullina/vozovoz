@@ -86,7 +86,6 @@ export default Vue.extend({
       }
     })
     .then(response => {
-      console.log(response)
       const responseData: any[]  = response.data.response.data
       for(let i = 0; i < responseData.length; i++) {
         this.locations.push({ label: responseData[i].name, code: responseData[i].guid, hasTerminal: !!responseData[i].default_terminal })
@@ -109,7 +108,6 @@ export default Vue.extend({
   },
   methods: {
     searchLocation (search: string, loading: any): void {
-      console.log(search + ' ' + loading)
       this.$axios.post(this.url, {
         object: 'location',
         action: 'get',
@@ -123,7 +121,6 @@ export default Vue.extend({
         for(let i = 0; i < responseData.length; i++) {
           this.locations.push({ label: responseData[i].name, code: responseData[i].guid, hasTerminal: !!responseData[i].default_terminal })
         }
-        console.log(this.locations)
       })
     }, 
     calculatePrice(): void {
@@ -156,7 +153,6 @@ export default Vue.extend({
       }
       this.$axios.post(this.url, json)
       .then(response => {
-        console.log(response)
         const responseData = response.data.response
         this.basePrice = responseData.basePrice
         this.price = responseData.price
@@ -188,6 +184,11 @@ export default Vue.extend({
       if(this.dispatchLocation && !this.dispatchLocation.hasTerminal && (this.dispatchLocationPoint === 'terminal')){
         this.dispatchLocationPoint = 'address'
       }
+      else if(this.dispatchLocation && this.destinationLocation && (this.dispatchLocation.code === this.destinationLocation.code) 
+        && (this.dispatchLocationPoint === 'terminal') && (this.destinationLocationPoint === 'terminal')) {
+          this.dispatchLocationPoint = 'address'
+          console.log('disp')
+      }
       else {
         this.calculatePrice()
       }
@@ -196,14 +197,30 @@ export default Vue.extend({
       if(this.destinationLocation && !this.destinationLocation.hasTerminal && (this.destinationLocationPoint === 'terminal')){
         this.destinationLocationPoint = 'address'
       }
+      else if(this.dispatchLocation && this.destinationLocation && (this.dispatchLocation.code === this.destinationLocation.code) 
+        && (this.dispatchLocationPoint === 'terminal') && (this.destinationLocationPoint === 'terminal')) {
+          this.dispatchLocationPoint = 'address'
+          console.log('dest')
+      }
       else {
         this.calculatePrice()
       }
     },
     dispatchLocationPoint: function() {
+      console.log(this.dispatchLocationPoint)
+      if(this.dispatchLocation && this.destinationLocation && (this.dispatchLocation.code === this.destinationLocation.code) 
+        && (this.dispatchLocationPoint === 'terminal') && (this.destinationLocationPoint === 'terminal')) {
+          console.log('dispP')
+          this.destinationLocationPoint = 'address'
+      }
       this.calculatePrice()
     },
     destinationLocationPoint: function() {
+      if(this.dispatchLocation && this.destinationLocation && (this.dispatchLocation.code === this.destinationLocation.code)  
+        && (this.dispatchLocationPoint === 'terminal') && (this.destinationLocationPoint === 'terminal')) {
+          this.dispatchLocationPoint = 'address'
+          console.log('destpP')
+      }
       this.calculatePrice()
     }
   }
